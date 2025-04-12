@@ -6,6 +6,40 @@ from app.llm.answer_generator import generate_ai_answer
 from app.schemas.question import QuestionCreate, AnswerCreate
 
 
+def create_and_save_question(db: Session, project_id: int, video_text: str) -> int:
+    """
+    프로젝트에 대한 첫 번째 질문을 생성하고 저장합니다.
+    """
+    # 1. 루트 노드 생성
+    root_node = node_crud.create_node(
+        db=db,
+        project_id=project_id,
+        level=1,
+        keyword="Root"  # 루트 노드의 키워드
+    )
+
+    # 2. 질문 생성
+    question_text, ai_answer_text = generate_question_and_answer(video_text)
+
+    # 3. 질문 저장
+    question = question_crud.create_question(
+        db=db,
+        node_id=root_node.id,
+        content=question_text
+    )
+
+    # 4. AI 예상 답변 저장
+    answer = answer_crud.create_answer(
+        db=db,
+        node_id=root_node.id,
+        question_id=question.id,
+        content=ai_answer_text,
+        is_user=False  # AI 답변
+    )
+
+    return question.id
+
+
 def create_child_question_flow(db: Session, parent_node: Node, video_text: str):
     """
     특정 노드의 자식 질문 생성 및 저장 흐름 처리.

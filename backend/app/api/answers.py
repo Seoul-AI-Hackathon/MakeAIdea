@@ -14,7 +14,7 @@ from app.crud.project import get_project_by_id
 
 router = APIRouter()
 
-@router.post("/questions/{question_id}/answer/user", response_model=ScoreOut)
+@router.post("/questions/answer/user", response_model=ScoreOut)
 def submit_user_answer(question_id: int, payload: UserAnswerIn, db: Session = Depends(get_db)):
     create_user_answer(db, question_id, payload.answer_user)
     ai_answer = get_ai_answer_by_question_id(db, question_id)
