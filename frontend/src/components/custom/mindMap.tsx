@@ -63,75 +63,91 @@ interface NodePanelProps {
   node: Node | null;
   onClose: () => void;
   position?: { x: number; y: number };
+  fgRef?: React.RefObject<any>;
+  setGraphData: React.Dispatch<React.SetStateAction<GraphData>>;
 }
 
-const NodePanel = ({ node, onClose, position }: NodePanelProps) => {
+const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelProps) => {
   const [answer, setAnswer] = useState('');
   const question = "이 주제에 대해 당신은 어떻게 생각하시나요?"; // 하드코딩된 질문
 
-  if (!node || !position) return null;
+  if (!node) return null;
   
   return (
     <motion.div 
-      className="fixed bg-white shadow-lg z-50 rounded-lg w-[420px]"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
+      className="fixed bg-white shadow-lg z-50 rounded-lg w-[420px] right-6 top-1/2 -translate-y-1/2 overflow-hidden"
+      initial={{ opacity: 0, x: 420 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 420 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: 'translate(20px, -50%)'
-      }}
     >
       <div className="flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">{node.name}</h2>
+        <div className="flex justify-between items-center py-4 px-5 border-b bg-white">
+          <h2 className="text-lg font-semibold text-gray-900">{node.name}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
-            <X size={22}/>
+            <X size={20}/>
           </button>
         </div>
-        <div className="p-4 space-y-4">
-          <div className="text-gray-600">
+        <div className="p-5 space-y-5">
+          <div className="text-gray-600 text-sm">
             <p>{node.description || 'No description available.'}</p>
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Question
               </label>
-              <div className="w-full min-h-[60px] px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg text-blue-900 text-sm font-medium">
+              <div className="w-full px-4 py-3.5 bg-blue-50 border border-blue-100 rounded-lg text-blue-900 text-sm">
                 {question}
               </div>
             </div>
             
             <div>
-              <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-2">
                 Answer
               </label>
               <textarea
                 id="answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full h-[120px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                className="w-full h-[160px] px-4 py-3.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
                 placeholder="Enter your answer..."
               />
             </div>
-            
-            <button
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              onClick={() => {
-                // TODO: 저장 로직 구현
-                console.log('Save:', { question, answer });
-              }}
-            >
-              Save
-            </button>
           </div>
+        </div>
+        <div className="px-5 pb-5">
+          <button
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm font-medium"
+            onClick={() => {
+              if (answer.trim() && node) {
+                const newNodeId = `node${Date.now()}`;
+                const newNode = {
+                  id: newNodeId,
+                  name: answer,
+                  val: 6,
+                  color: '#334155',
+                  description: `Response to: ${node.name}`
+                };
+                const newLink = {
+                  source: node.id,
+                  target: newNodeId,
+                  color: '#475569'
+                };
+                setGraphData(prevData => ({
+                  nodes: [...prevData.nodes, newNode],
+                  links: [...prevData.links, newLink]
+                }));
+                onClose();
+              }
+            }}
+          >
+            Save
+          </button>
         </div>
       </div>
     </motion.div>
@@ -145,6 +161,7 @@ export default function MindMap() {
   const [mounted, setMounted] = useState(false)
   const [selectedNode, setSelectedNode] = useState<Node | null>(null)
   const [nodePosition, setNodePosition] = useState<{ x: number; y: number } | undefined>(undefined)
+  const [graphData, setGraphData] = useState<GraphData>(data)
 
   // 컴포넌트 마운트 시 상태 업데이트
   useEffect(() => {
@@ -222,7 +239,7 @@ export default function MindMap() {
     <div className="flex-1 w-full h-full bg-gray-100">
       <ForceGraph2D
         ref={fgRef}
-        graphData={data}
+        graphData={graphData}
         width={window.innerWidth - 240}
         height={window.innerHeight}
         nodeLabel="name"
@@ -263,6 +280,8 @@ export default function MindMap() {
         node={selectedNode} 
         onClose={handleCloseModal}
         position={nodePosition}
+        fgRef={fgRef}
+        setGraphData={setGraphData}
       />
     </div>
   )
