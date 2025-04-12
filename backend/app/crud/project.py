@@ -2,6 +2,9 @@ from app.models.project import Project
 from sqlalchemy.orm import Session
 from uuid import uuid4
 
+def get_all_projects(db: Session):
+    return db.query(Project).all()
+
 def create_project(db: Session, title: str, description: str) -> Project:
     project = Project(id=uuid4(), title=title, description=description)
     db.add(project)

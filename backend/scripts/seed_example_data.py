@@ -28,6 +28,11 @@ def run():
     print("🧠 Summarizing transcript with LLM...")
     summary = summarize_text(transcript)
 
+    # title이 없거나 UUID 형식이면 summary 앞 5단어로 대체
+    import re
+    if not title or re.fullmatch(r"[0-9a-f\-]{36}", title):
+        title = " ".join(summary.split()[:5]) + "..."
+
     print("💾 Saving project to database...")
     project = create_project(db, title=title, description=summary)
 
