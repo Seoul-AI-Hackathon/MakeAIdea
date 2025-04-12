@@ -10,32 +10,64 @@ const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), {
   ssr: false,
 })
 
+// 데이터베이스 타입 정의
+interface DBNode {
+  id: number
+  project_id: string
+  created_at: string
+  parent_id: number | null
+  keyword: string
+  node_question: {
+    id: number
+    question: string
+    Score: number
+    created_at: string
+    node_answer_user: {
+      id: number
+      answer_user: string
+      created_at: string
+    }[]
+    node_answer_ai: {
+      id: number
+      answer_ai: string
+      created_at: string
+    }[]
+  }[]
+}
+
 // 노드 데이터 타입 정의
 interface Node {
-  id: string        // 노드 고유 식별자
-  name: string      // 노드에 표시될 텍스트
-  val: number       // 노드 크기
-  color: string     // 노드 색상
-  description?: string  // 노드 설명
-  x?: number        // x 좌표 (자동 계산)
-  y?: number        // y 좌표 (자동 계산)
-  vx?: number       // x축 속도 (물리 시뮬레이션용)
-  vy?: number       // y축 속도 (물리 시뮬레이션용)
-  fx?: number       // 고정 x 좌표 (선택적)
-  fy?: number       // 고정 y 좌표 (선택적)
+  id: string
+  name: string
+  val: number
+  color: string
+  description?: string
+  score?: number
+  userAnswer?: string
+  aiAnswer?: string
+  x?: number
+  y?: number
+  vx?: number
+  vy?: number
+  fx?: number
+  fy?: number
 }
 
 // 노드 간 연결선 타입 정의
 interface Link {
-  source: string    // 시작 노드 ID
-  target: string    // 도착 노드 ID
-  color: string     // 선 색상
+  source: string
+  target: string
+  color: string
 }
 
 // 전체 그래프 데이터 타입 정의
 interface GraphData {
   nodes: Node[]
   links: Link[]
+}
+
+interface MindMapProps {
+  nodes?: DBNode[]
 }
 
 // 마인드맵 초기 데이터
@@ -69,9 +101,27 @@ interface NodePanelProps {
 
 const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelProps) => {
   const [answer, setAnswer] = useState('');
-  const question = "이 주제에 대해 당신은 어떻게 생각하시나요?"; // 하드코딩된 질문
+  const [showAIAnswer, setShowAIAnswer] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const defaultQuestion = "What insights can you share about this topic?";
+  const nodeQuestion = node?.description || defaultQuestion;
+
+  useEffect(() => {
+    setAnswer(node?.userAnswer || '');
+    setShowAIAnswer(false);
+    setIsEditing(false);
+  }, [node]);
+
+  const handleClose = () => {
+    setAnswer('');
+    setShowAIAnswer(false);
+    setIsEditing(false);
+    onClose();
+  };
 
   if (!node) return null;
+
+  const hasUserAnswer = node.userAnswer && node.userAnswer.trim().length > 0;
   
   return (
     <motion.div 
@@ -85,15 +135,23 @@ const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelPr
         <div className="flex justify-between items-center py-4 px-5 border-b bg-white">
           <h2 className="text-lg font-semibold text-gray-900">{node.name}</h2>
           <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            onClick={handleClose}
+            className="text-gray-500 hover:text-gray-900"
           >
             <X size={20}/>
           </button>
         </div>
         <div className="p-5 space-y-5">
-          <div className="text-gray-600 text-sm">
-            <p>{node.description || 'No description available.'}</p>
+          <div className="flex justify-between items-center text-sm">
+            <p className="text-gray-600 font-medium">Selected topic: {node.name}</p>
+            {node.score !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">Score:</span>
+                <span className="px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
+                  {node.score}
+                </span>
+              </div>
+            )}
           </div>
           
           <div className="space-y-4">
@@ -102,76 +160,202 @@ const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelPr
                 Question
               </label>
               <div className="w-full px-4 py-3.5 bg-blue-50 border border-blue-100 rounded-lg text-blue-900 text-sm">
-                {question}
+                {nodeQuestion}
               </div>
             </div>
-            
-            <div>
-              <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-2">
-                Answer
-              </label>
-              <textarea
-                id="answer"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                className="w-full h-[160px] px-4 py-3.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
-                placeholder="Enter your answer..."
-              />
-            </div>
+
+            {hasUserAnswer && !isEditing ? (
+              <>
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Your Answer
+                    </label>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Edit answer
+                    </button>
+                  </div>
+                  <div className="w-full px-4 py-3.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 text-sm">
+                    {node.userAnswer}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    AI Answer
+                  </label>
+                  <div className="w-full px-4 py-3.5 bg-pink-50 border border-pink-100 rounded-lg text-pink-700 text-sm font-bold">
+                    {node.aiAnswer || "AI answer is not available for this topic."}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium text-gray-700">
+                    {showAIAnswer ? "AI Answer" : "Your Answer"}
+                  </label>
+                  {!isEditing && (
+                    <button
+                      onClick={() => setShowAIAnswer(!showAIAnswer)}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      {showAIAnswer ? "Write your answer" : "See AI answer"}
+                    </button>
+                  )}
+                </div>
+                
+                {showAIAnswer && !isEditing ? (
+                  <div className="w-full px-4 py-3.5 bg-pink-50 border border-pink-100 rounded-lg text-pink-700 text-sm min-h-[160px] font-bold">
+                    {node.aiAnswer || "AI answer is not available for this topic."}
+                  </div>
+                ) : (
+                  <textarea
+                    id="answer"
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    className="w-full h-[160px] px-4 py-3.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                    placeholder="Share your thoughts about this topic..."
+                  />
+                )}
+              </>
+            )}
           </div>
         </div>
-        <div className="px-5 pb-5">
-          <button
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm font-medium"
-            onClick={() => {
-              if (answer.trim() && node) {
-                const newNodeId = `node${Date.now()}`;
-                const newNode = {
-                  id: newNodeId,
-                  name: answer,
-                  val: 6,
-                  color: '#334155',
-                  description: `Response to: ${node.name}`
-                };
-                const newLink = {
-                  source: node.id,
-                  target: newNodeId,
-                  color: '#475569'
-                };
-                setGraphData(prevData => ({
-                  nodes: [...prevData.nodes, newNode],
-                  links: [...prevData.links, newLink]
-                }));
-                onClose();
-              }
-            }}
-          >
-            Save
-          </button>
-        </div>
+        {(!hasUserAnswer || isEditing) && !showAIAnswer && (
+          <div className="px-5 pb-5 space-y-3">
+            <button
+              className="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm font-medium"
+              onClick={() => {
+                if (answer.trim() && node) {
+                  if (isEditing) {
+                    // 기존 노드 업데이트
+                    setGraphData(prevData => ({
+                      ...prevData,
+                      nodes: prevData.nodes.map(n => 
+                        n.id === node.id 
+                          ? { ...n, userAnswer: answer }
+                          : n
+                      )
+                    }));
+                    setIsEditing(false);
+                  } else {
+                    // 새 노드 생성
+                    const newNodeId = `node${Date.now()}`;
+                    const newNode = {
+                      id: newNodeId,
+                      name: answer,
+                      val: 6,
+                      color: '#334155',
+                      description: `What are your thoughts on: ${node.name}?`,
+                      userAnswer: answer,
+                      aiAnswer: "This is a sample AI response that provides detailed insights about the topic. It includes analysis and suggestions based on the context."
+                    };
+                    const newLink = {
+                      source: node.id,
+                      target: newNodeId,
+                      color: '#475569'
+                    };
+                    setGraphData(prevData => ({
+                      nodes: [...prevData.nodes, newNode],
+                      links: [...prevData.links, newLink]
+                    }));
+                  }
+                  handleClose();
+                }
+              }}
+            >
+              {isEditing ? "Save changes" : "Save"}
+            </button>
+            {isEditing && (
+              <button
+                className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-sm font-medium"
+                onClick={() => {
+                  setIsEditing(false);
+                  setAnswer(node.userAnswer || '');
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );
 };
 
-export default function MindMap() {
-  // ForceGraph 인스턴스에 대한 참조
+// 데이터베이스 노드를 시각화 노드로 변환하는 함수
+const convertDBNodesToGraphData = (dbNodes: DBNode[] = []): GraphData => {
+  if (!dbNodes.length) return { nodes: [], links: [] };
+
+  // parent_id가 null인 노드를 찾아 중앙 노드로 설정
+  const mainNode = dbNodes.find(node => node.parent_id === null);
+  if (!mainNode) return { nodes: [], links: [] };
+
+  const nodes: Node[] = [
+    // 중앙 노드 (parent_id가 null인 노드)
+    {
+      id: mainNode.id.toString(),
+      name: mainNode.keyword,
+      val: 8,
+      color: '#1e293b',
+      description: mainNode.node_question[0]?.question || 'Main topic',
+      score: mainNode.node_question[0]?.Score,
+      userAnswer: mainNode.node_question[0]?.node_answer_user[0]?.answer_user,
+      aiAnswer: mainNode.node_question[0]?.node_answer_ai[0]?.answer_ai
+    },
+    // 나머지 노드들을 변환 (중앙 노드 제외)
+    ...dbNodes
+      .filter(node => node.id !== mainNode.id)
+      .map(node => ({
+        id: node.id.toString(),
+        name: node.keyword,
+        val: 6,
+        color: '#334155',
+        description: node.node_question[0]?.question || 'No question available',
+        score: node.node_question[0]?.Score,
+        userAnswer: node.node_question[0]?.node_answer_user[0]?.answer_user,
+        aiAnswer: node.node_question[0]?.node_answer_ai[0]?.answer_ai
+      }))
+  ];
+
+  // 연결선 생성 (parent_id가 null인 노드는 제외)
+  const links: Link[] = dbNodes
+    .filter(node => node.id !== mainNode.id)
+    .map(node => ({
+      source: node.parent_id!.toString(),
+      target: node.id.toString(),
+      color: '#475569'
+    }));
+
+  return { nodes, links };
+};
+
+export default function MindMap({ nodes: dbNodes }: MindMapProps) {
   const fgRef = useRef<any>(null)
-  // 컴포넌트 마운트 상태 관리 (클라이언트 사이드 렌더링 제어)
   const [mounted, setMounted] = useState(false)
   const [selectedNode, setSelectedNode] = useState<Node | null>(null)
   const [nodePosition, setNodePosition] = useState<{ x: number; y: number } | undefined>(undefined)
-  const [graphData, setGraphData] = useState<GraphData>(data)
+  const [graphData, setGraphData] = useState<GraphData>(convertDBNodesToGraphData(dbNodes))
 
   // 컴포넌트 마운트 시 상태 업데이트
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // dbNodes가 변경될 때 그래프 데이터 업데이트
+  useEffect(() => {
+    setGraphData(convertDBNodesToGraphData(dbNodes));
+  }, [dbNodes]);
+
   // 노드 클릭 이벤트 핸들러
   const handleNodeClick = useCallback((node: any, event: MouseEvent) => {
-    // 메인 타이틀(center) 노드는 클릭해도 모달창이 열리지 않음
-    if (node.id === 'center') return;
+    // parent_id가 null인 메인 노드는 클릭해도 모달창이 열리지 않음
+    const mainNode = dbNodes?.find(n => n.parent_id === null);
+    if (mainNode && node.id === mainNode.id.toString()) return;
 
     if (fgRef.current) {
       // 클릭한 노드로 부드럽게 이동
@@ -195,7 +379,7 @@ export default function MindMap() {
       setSelectedNode(node as Node)
       setNodePosition({ x: nodeScreenX, y: nodeScreenY })
     }
-  }, [])
+  }, [dbNodes])
 
   // 모달 닫기 핸들러
   const handleCloseModal = useCallback(() => {

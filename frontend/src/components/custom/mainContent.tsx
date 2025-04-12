@@ -3,9 +3,20 @@
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import StartProjectModal from "./startProjectModal"
-import { ChatHistoryCard } from "./chatHistoryCard"
+import { ProjectCard } from "./projectCard"
 
-export default function MainContent() {
+interface Project {
+  id: string
+  title: string
+  description: string
+  created_at: string
+}
+
+interface MainContentProps {
+  projects: Project[]
+}
+
+export default function MainContent({ projects }: MainContentProps) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -23,12 +34,17 @@ export default function MainContent() {
       </Button>
 
       <div className="w-full max-w-6xl mt-16">
-        <h2 className="text-lg font-medium mb-4">Chat history</h2>
+        <h2 className="text-lg font-medium mb-4">Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <ChatHistoryCard title="Chat name" description="Short chat description" thumbnail="/img-placeholder.svg" />
-          <ChatHistoryCard title="Chat name" description="Short chat description" thumbnail="/img-placeholder.svg" />
-          <ChatHistoryCard title="Chat name" description="Short chat description" thumbnail="/img-placeholder.svg" />
-          <ChatHistoryCard title="Chat name" description="Short chat description" thumbnail="/img-placeholder.svg" />
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              id={project.id}
+              title={project.title}
+              description={project.description}
+              thumbnail="/img-placeholder.svg"
+            />
+          ))}
         </div>
       </div>
 
