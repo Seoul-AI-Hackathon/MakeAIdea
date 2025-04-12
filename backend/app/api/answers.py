@@ -3,13 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.answer import UserAnswerIn, ScoreOut
 from app.core.db import get_db
-from app.crud.answer import create_user_answer, get_ai_answer_by_question_id
-from app.crud.question import get_question_by_id, update_question_score
+from backend.app.crud.answer_service import create_user_answer, get_ai_answer_by_question_id
+from backend.app.crud.question_service import get_question_by_id, update_question_score
 from app.crud.node import get_node_by_question_id, create_node
 from app.services.answer_evaluator import evaluate_answer
 from app.services.question_generator import generate_question_and_answer, extract_keyword
-from app.crud.question import create_question
-from app.crud.answer import create_ai_answer
+from backend.app.crud.question_service import create_question
+from backend.app.crud.answer_service import create_ai_answer
 from app.crud.project import get_project_by_id
 
 router = APIRouter()
