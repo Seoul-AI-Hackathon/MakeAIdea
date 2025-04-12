@@ -7,23 +7,16 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - mcp_server
-
-  mcp_server:
-    build:
-      context: ./backend_mcp_server
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mcp_db
-    depends_on:
-      - db
-    ports:
-      - "5000:5000"
+      - rag_agent
 
   rag_agent:
     build:
-      context: ./backend_rag_agent
+      context: ./rag_agent
     ports:
       - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mcp_db
+      - OPENAI_API_KEY=your-api-key
     depends_on:
       - db
 
