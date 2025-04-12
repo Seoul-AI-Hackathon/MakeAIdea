@@ -1,0 +1,50 @@
+{
+  "project": {
+    "id": "cnn-uuid",
+    "title": "CNN",
+    "description": "합성곱 신경망의 구조, 학습 방식, 응용에 대한 개념을 정리한 학습 프로젝트입니다.",
+    "created_at": "2025-04-12T13:00:00Z",
+    "nodes": [
+      {
+        "id": 1,
+        "project_id": "cnn-uuid",
+        "parent_id": null,
+        "level": 0,
+        "created_at": "2025-04-12T13:00:01Z",
+        "questions": []
+      },
+      {
+        "id": 2,
+        "project_id": "cnn-uuid",
+        "parent_id": 1,
+        "level": 1,
+        "created_at": "2025-04-12T13:01:00Z",
+        "questions": [
+          {
+            "id": 1,
+            "node_id": 2,
+            "question": "CNN의 기본 구성 요소는 무엇인가요?",
+            "created_at": "2025-04-12T13:01:10Z",
+            "score": 9,
+            "node_answer_user": [
+              {
+                "id": 101,
+                "question_id": 1,
+                "answer_user": "Conv 레이어, 풀링 레이어, 완전 연결층 등이 있습니다.",
+                "created_at": "2025-04-12T13:02:00Z"
+              }
+            ],
+            "node_answer_ai": [
+              {
+                "id": 201,
+                "question_id": 1,
+                "answer_ai": "CNN은 주로 Convolution, Pooling, Fully Connected 계층으로 구성됩니다.",
+                "created_at": "2025-04-12T13:01:30Z"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
