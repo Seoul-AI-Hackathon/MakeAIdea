@@ -1,8 +1,9 @@
-from pydantic import BaseSettings
+# app/core/config.py
+from pydantic_settings import BaseSettings  # ✅ 변경된 위치!
 
 class Settings(BaseSettings):
-    OPENAI_API_KEY: str = "your-openai-api-key"
-    DATABASE_URL: str = "postgresql://user:password@localhost/makeaidea"
+    DATABASE_URL: str
+    OPENAI_API_KEY: str
 
     class Config:
         env_file = ".env"

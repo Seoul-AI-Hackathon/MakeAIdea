@@ -1,0 +1,3 @@
+# .env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/makeaidea
+OPENAI_API_KEY=your-openai-api-key

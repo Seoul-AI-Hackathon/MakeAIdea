@@ -1,8 +1,9 @@
-# 🧠 makeAidea Backend
+# README.md
+# 💡 makeAidea Backend
 
-LLM 기반 비디오 분석 및 학습 시스템 백엔드입니다.
+LLM 기반 비디오 및 학습 시스템 백엔드입니다.
 
-## 🚀 구성 요소
+## ⚛️ 구성 요소
 - FastAPI 기반 REST API
 - PostgreSQL + SQLAlchemy
 - Whisper + OpenAI 기반 요약 및 질의 생성
@@ -20,16 +21,19 @@ docker compose up -d
 pip install -r requirements.txt
 
 # 4. 테이블 생성
-python scripts/create_tables.py
+PYTHONPATH=. python scripts/create_tables.py
 
-# 5. 샘플 영상 데이터 분석 및 저장
-python scripts/seed_example_data.py
+# 5. 예시 비디오 데이터 배포 및 저장
+PYTHONPATH=. python scripts/seed_example_data.py
 
 # 6. 트리 자동 생성 (레벨 3까지)
-python scripts/generate_full_tree.py
+PYTHONPATH=. python scripts/generate_full_tree.py
 
 # 7. 서버 실행
 uvicorn app.main:app --reload
+
+# 8. db 초기화
+PYTHONPATH=. python scripts/reset_db.py
 ```
 
 ## 📁 디렉토리 구조
@@ -47,7 +51,8 @@ backend/
 ├── scripts/              # 초기화/테스트 스크립트
 ├── docker-compose.yml
 ├── requirements.txt
-└── .env
+├── .env
+└── README.md
 ```
 
 ## 📌 주요 기능 흐름
