@@ -106,6 +106,32 @@ const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelPr
   const defaultQuestion = "What insights can you share about this topic?";
   const nodeQuestion = node?.description || defaultQuestion;
 
+  const saveAnswer = async (nodeId: string, answer: string) => {
+    try {
+      const response = await fetch('/api/answer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nodeId,
+          answer,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save answer');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error saving answer:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     setAnswer(node?.userAnswer || '');
     setShowAIAnswer(false);
@@ -228,10 +254,10 @@ const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelPr
           <div className="px-5 pb-5 space-y-3">
             <button
               className="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm font-medium"
-              onClick={() => {
+              onClick={async () => {
                 if (answer.trim() && node) {
-                  if (isEditing) {
-                    // 기존 노드 업데이트
+                  try {
+                    await saveAnswer(node.id, answer);
                     setGraphData(prevData => ({
                       ...prevData,
                       nodes: prevData.nodes.map(n => 
@@ -241,29 +267,11 @@ const NodePanel = ({ node, onClose, position, fgRef, setGraphData }: NodePanelPr
                       )
                     }));
                     setIsEditing(false);
-                  } else {
-                    // 새 노드 생성
-                    const newNodeId = `node${Date.now()}`;
-                    const newNode = {
-                      id: newNodeId,
-                      name: answer,
-                      val: 6,
-                      color: '#334155',
-                      description: `What are your thoughts on: ${node.name}?`,
-                      userAnswer: answer,
-                      aiAnswer: "This is a sample AI response that provides detailed insights about the topic. It includes analysis and suggestions based on the context."
-                    };
-                    const newLink = {
-                      source: node.id,
-                      target: newNodeId,
-                      color: '#475569'
-                    };
-                    setGraphData(prevData => ({
-                      nodes: [...prevData.nodes, newNode],
-                      links: [...prevData.links, newLink]
-                    }));
+                    handleClose();
+                  } catch (error) {
+                    console.error('Failed to save answer:', error);
+                    // 에러 처리 (예: 사용자에게 알림)
                   }
-                  handleClose();
                 }
               }}
             >

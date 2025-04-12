@@ -2,13 +2,6 @@ import { supabase } from "@/lib/supabase"
 import SideBar from "@/components/custom/sidebar"
 import MindMap from "@/components/custom/mindMap"
 
-interface Project {
-  id: string
-  title: string
-  description: string
-  created_at: string
-}
-
 async function getProjects() {
   const { data: projects, error } = await supabase
     .from('projects')
