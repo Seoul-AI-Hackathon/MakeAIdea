@@ -1,8 +1,10 @@
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain.schema.output_parser import StrOutputParser
+from app.core.config import settings
 
-llm = ChatOpenAI(model="gpt-4", temperature=0.5)
+llm = ChatOpenAI(model="gpt-4", temperature=0.5,
+    openai_api_key=settings.OPENAI_API_KEY)
 output_parser = StrOutputParser()
 
 def generate_summary(raw_text: str) -> str:
