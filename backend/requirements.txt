@@ -1,0 +1,14 @@
+# requirements.txt
+fastapi
+uvicorn
+psycopg2-binary
+sqlalchemy
+pydantic
+python-dotenv
+openai
+transformers
+speechrecognition
+pydub
+pytesseract
+opencv-python
+requests
