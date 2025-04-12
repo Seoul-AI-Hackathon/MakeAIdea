@@ -1,9 +1,15 @@
-def generate_question_and_answer(summary: str) -> tuple[str, str]:
-    # 🤖 DUMMY: 실제로는 GPT 등을 사용해 질문과 AI 답변 생성
-    question = "What is a convolution layer?"
-    answer = "A convolution layer is used to extract features from images using filters."
-    return question, answer
+# backend/app/services/question_generator.py
+from app.llm.question_generator import generate_question_from_summary
+from app.llm.answer_generator import generate_expected_answer
 
-def extract_keyword(question: str) -> str:
-    # DUMMY: 질문에서 키워드를 추출하는 함수
-    return "convolution layer"
+
+def extract_keywords_from_question(question: str) -> list[str]:
+    # 간단한 키워드 추출 (예: 명사 필터링 or 공백 기준 분할)
+    return [word.strip("?.,") for word in question.split() if len(word) > 3]
+
+
+def generate_question(summary: str) -> tuple[str, str, list[str]]:
+    question = generate_question_from_summary(summary)
+    expected = generate_expected_answer(question, context=summary)
+    keywords = extract_keywords_from_question(question)
+    return question, expected, keywords
