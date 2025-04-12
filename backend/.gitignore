@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual environment
+.venv/
+env/
+ENV/
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# SQLite or local DBs
+*.db
+*.sqlite3
+
+# Audio/Video temp
+temp_audio/
+temp_video/
+
+# Environment
+.env
+.env.*
+
+# Docker
+*.pid
+*.sock
+
+# Jupyter or IPython
+.ipynb_checkpoints/
+
+# Zip or temporary
+*.zip
+*.tar
+*.tar.gz
+*.bak
+
+# Project-specific
+app/services.zip
+backend_structure.txt
+
+__pycache__/
+*.pyc
+.DS_Store
+temp_audio/
+__MACOSX/
