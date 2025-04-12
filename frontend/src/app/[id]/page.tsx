@@ -2,12 +2,35 @@ import { supabase } from "@/lib/supabase"
 import SideBar from "@/components/custom/sidebar"
 import MindMap from "@/components/custom/mindMap"
 
+interface Project {
+  id: string
+  title: string
+  description: string
+  created_at: string
+}
+
+async function getProjects() {
+  const { data: projects, error } = await supabase
+    .from('projects')
+    .select('id, title')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching projects:', error)
+    return []
+  }
+
+  return projects
+}
+
 export default async function IdPage({
   params
 }: {
   params: { id: string }
 }) {
-  // 프로젝트의 모든 노드 가져오기
+  const { id } = await Promise.resolve(params)
+  const projects = await getProjects()
+
   const { data: nodes, error: nodesError } = await supabase
     .from('node')
     .select(`
@@ -29,17 +52,17 @@ export default async function IdPage({
         )
       )
     `)
-    .eq('project_id', params.id);
+    .eq('project_id', id)
 
   if (nodesError) {
-    console.error('Error fetching nodes:', nodesError);
-    return <div>Error loading nodes</div>;
+    console.error('Error fetching nodes:', nodesError)
+    return <div>Error loading nodes</div>
   }
 
   return (
     <div className="flex h-screen bg-black">
       <div className="w-[240px] border-r border-gray-800">
-        <SideBar currentProjectId={params.id} />
+        <SideBar projects={projects} currentProjectId={id} />
       </div>
       <div className="flex-1 overflow-hidden">
         <MindMap nodes={nodes} />
