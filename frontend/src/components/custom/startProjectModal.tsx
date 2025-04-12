@@ -1,13 +1,23 @@
 'use client'
 
 import Modal from "../ui/modal"
-import {Link as LinkIcon } from "lucide-react"
+import { Link as LinkIcon, Loader2 } from "lucide-react"
+import { useState } from "react"
 
 interface StartProjectModalProps {
   onClose: () => void;
 }
 
 export default function StartProjectModal({ onClose }: StartProjectModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStartConversation = async () => {
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    setIsLoading(false);
+    onClose();
+  };
+
   return (
     <Modal 
       onClose={onClose}
@@ -30,8 +40,19 @@ export default function StartProjectModal({ onClose }: StartProjectModalProps) {
             </button>
           </div>
         </div>
-        <button className="w-full bg-gray-900 text-white text-sm py-2 rounded-lg hover:bg-gray-800 transition-colors">
-          Start a conversation
+        <button 
+          className="w-full bg-gray-900 text-white text-sm py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          onClick={handleStartConversation}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 size={16} className="animate-spin mr-2" />
+              Starting conversation...
+            </>
+          ) : (
+            'Start a conversation'
+          )}
         </button>
       </div>
     </Modal>

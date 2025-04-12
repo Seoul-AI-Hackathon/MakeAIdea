@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import SideBar from "@/components/custom/sidebar"
 import MindMap from "@/components/custom/mindMap"
+// import ProgressiveMindMap from "@/components/custom/progressiveMindMap"
 
 async function getProjects() {
   const { data: projects, error } = await supabase
@@ -59,6 +60,7 @@ export default async function IdPage({
       </div>
       <div className="flex-1 overflow-hidden">
         <MindMap nodes={nodes} />
+        {/* <ProgressiveMindMap nodes={nodes} /> */}
       </div>
     </div>
   )
