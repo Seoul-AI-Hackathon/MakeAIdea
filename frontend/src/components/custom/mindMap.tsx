@@ -70,26 +70,6 @@ interface MindMapProps {
   nodes?: DBNode[]
 }
 
-// 마인드맵 초기 데이터
-const data: GraphData = {
-  nodes: [
-    // 중앙 노드 (메인 주제)
-    { id: 'center', name: 'main title', val: 8, color: '#1e293b', description: 'This is the main topic of our mind map.' },
-    // 주변 노드들 (서브 주제)
-    { id: 'node1', name: 'idea 1', val: 6, color: '#334155', description: 'First key idea branching from the main topic.' },
-    { id: 'node2', name: 'idea 2', val: 6, color: '#334155', description: 'Second key idea exploring another aspect.' },
-    { id: 'node3', name: 'idea 3', val: 6, color: '#334155', description: 'Third key point connecting to the main theme.' },
-    { id: 'node4', name: 'idea 4', val: 6, color: '#334155', description: 'Fourth concept completing the thought process.' },
-  ],
-  // 노드 간 연결 정의
-  links: [
-    { source: 'center', target: 'node1', color: '#475569' },
-    { source: 'center', target: 'node2', color: '#475569' },
-    { source: 'center', target: 'node3', color: '#475569' },
-    { source: 'center', target: 'node4', color: '#475569' },
-  ],
-}
-
 // 노드 정보 패널 컴포넌트
 interface NodePanelProps {
   node: Node | null;

@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const { nodeId, answer } = await request.json();
 
-    const response = await fetch('https://127.0.0.1:8000/answer/user', {
+    const response = await fetch('http://127.0.0.1:8000/answer/user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
